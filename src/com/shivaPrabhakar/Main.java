@@ -9,15 +9,19 @@ public class Main {
 
         while (true) {
             String s = Taskmanagement.menu();
-            if (s.equals("Add") || s.equals("add"))
+            if (s.equalsIgnoreCase("Add"))
                 Taskmanagement.addData();
-            if (s.equals("list") || s.equals("List"))
+            if (s.equalsIgnoreCase("list") )
                 Taskmanagement.listData();
-            if (s.equals("search") || s.equals("Search"))
+            if (s.equalsIgnoreCase("search") )
                 Taskmanagement.searchData();
-            if (s.equals("delete") || s.equals("Delete") )
+            if (s.equalsIgnoreCase("delete"))
                 Taskmanagement.deleteData();
-            if (s.equals("Quit") || s.equals("quit"))
+            if(s.equalsIgnoreCase("ListByStatus"))
+                System.out.println(Taskmanagement.listByStatus());
+            if(s.equalsIgnoreCase("changestatus"))
+                Taskmanagement.changeStatus();
+            if (s.equalsIgnoreCase("Quit"))
                 System.exit(0);
         }
     }

@@ -5,12 +5,12 @@ import java.io.InputStreamReader;
 import  java.io.IOException;
 import java.util.Date;
 
-public class Taskmanagement extends Taskobj {
+class Taskmanagement extends Taskobj {
 
     public static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-    private static ArrayList<Taskobj> task = new ArrayList<Taskobj>();
+    protected static ArrayList<Taskobj> task = new ArrayList<Taskobj>();
 
-    public static boolean isNumeric(String q){
+    protected static boolean isNumeric(String q){
         try{
             int w = Integer.parseInt(q);
             return true;
@@ -19,7 +19,7 @@ public class Taskmanagement extends Taskobj {
             return false;
         }
     }
-    public static void addData()throws IOException{
+    protected static void addData()throws IOException{
 
         System.out.println("enter task name");
         String name = br.readLine();
@@ -35,21 +35,19 @@ public class Taskmanagement extends Taskobj {
 
     }
 
-    public static void listData()throws IOException{
+    protected static void listData()throws IOException{
 
-//            for (Taskobj obj : task) {
-//                System.out.println(obj);
-//            }
         System.out.println(task);
     }
 
-    public static Taskobj searchData()throws IOException{
+    protected static Taskobj searchData()throws IOException{
 
             System.out.println("enter task name or number");
             String nam = br.readLine();
             if(!isNumeric(nam)) {
                 for (Taskobj obj : task) {
-                    if (obj.getName().equals(nam)) {
+                    String qury = obj.getName();
+                    if (qury.equalsIgnoreCase(nam)) {
                         System.out.println("task found");
                         System.out.println(obj);
                         return obj;
@@ -63,24 +61,18 @@ public class Taskmanagement extends Taskobj {
         return null;
     }
 
-    public static void deleteData()throws IOException{
-
-            System.out.println("enter task name");
+    protected static void deleteData()throws IOException{
             boolean qw = false;
-            String nam = br.readLine();
-            for(Taskobj obj:task) {
-                if (obj.getName().equals(nam)) {
-                    System.out.println("task found");
-                    System.out.println("if task is completed enter (y) else (n)");
-                    String as = br.readLine();
-                    if(as.equals("y") || as.equals("Y"))
-                        obj.setStatus(Status.DONE);
-                    System.out.println(obj);
-                    task.remove(obj);
-                    qw = true;
-                    break;
-                }
-            }
+            Taskobj obj = searchData();
+            System.out.println("if task is completed enter (y) else (n)");
+            String as = br.readLine();
+            if(as.equalsIgnoreCase("y") )
+                obj.setStatus(Status.DONE);
+            System.out.println(obj);
+            task.remove(obj);
+            qw = true;
+
+
             if(qw == false){
                 System.out.println("Task not found.");
             }
@@ -88,28 +80,36 @@ public class Taskmanagement extends Taskobj {
 
     }
 
-    public static String menu ()throws IOException{
+      protected static  String menu ()throws IOException{
         System.out.println("\nenter function");
-        System.out.println("Add,  List,  Search,  Delete,  Quit");
+        System.out.println("Add,  List,  Search,  Delete,  Quit, ListByStatus, ChangeStatus");
         String s = br.readLine();
         return s;
     }
 
-//    public static void main(String[] args)throws IOException{
-//
-//        System.out.println("enter function");
-//        System.out.println("Add,  List,  Search,  Delete,  Quit");
-//        String s = br.readLine();
-//
-//        while(true) {
-//            addData(s,task);
-//            listData(s,task);
-//            searchData(s,task);
-//            deleteData(s,task);
-//            if(s.equals("Quit")|| s.equals("quit"))
-//                System.exit(0);
-//            s = br.readLine();
-//        }
-//
-//    }
+    protected static ArrayList<Taskobj> listByStatus()throws IOException{
+        System.out.println("\nenter a status code to filter");
+        ArrayList<Taskobj> arr = new ArrayList<Taskobj>();
+        String qq = br.readLine();
+        for(Taskobj obj : task){
+            String stat = obj.getStatus().toString();
+            if(stat.equalsIgnoreCase(qq)){
+                arr.add(obj);
+            }
+        }
+        return arr;
+    }
+
+    protected static void changeStatus(){
+        Taskobj obj = searchData();
+        System.out.println("enter status (INITIAL | INPROGRESS | DONE)");
+        String st = br.readLine();
+        if(st.equalsIgnoreCase("initial"))
+            obj.setStatus(Status.INITIAL);
+        if(st.equalsIgnoreCase("inprogress"))
+            obj.setStatus(Status.INPROGRESS);
+        if(st.equalsIgnoreCase("done"))
+            obj.setStatus(Status.DONE);
+        System.out.println(obj);
+    }
 }
