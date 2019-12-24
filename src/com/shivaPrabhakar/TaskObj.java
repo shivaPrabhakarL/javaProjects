@@ -54,7 +54,7 @@ public class TaskObj{
 
     @Override
     public String toString() {
-        return  ('\n'+
+        return  ("\n\nid : "+id+'\n'+
                 "name : " + name + '\n' +
                 "desc : " + desc + '\n' +
                 "status : " + status + '\n' +

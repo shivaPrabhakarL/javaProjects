@@ -1,12 +1,18 @@
 package com.shivaPrabhakar;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+//import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
 
-class TaskManagement {
-
-    protected  ArrayList<TaskObj> task = new ArrayList<>();
-
-    protected  boolean isNumeric(String q){
+class TaskManager {
+    Random rand = new Random();
+    private List<TaskObj> task = new ArrayList<>();
+    //private HashMap<Integer,TaskObj> taskObjHashMap =
+    SimpleDateFormat format =new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+    private  boolean isNumeric(String q){
         try{
              Integer.parseInt(q);
             return true;
@@ -15,18 +21,23 @@ class TaskManagement {
             return false;
         }
     }
-    protected  void addData(String name,String des, int i){
 
+    protected boolean checkData(){
+        return (task.size() > 0);
+    }
+
+    protected  TaskObj addData(String name,String des,String date) throws ParseException {
         TaskObj to = new TaskObj();
         to.setName(name);
         to.setDesc(des);
-        to.setId(i);
-        to.setDate(new Date());
+        to.setId(rand.nextInt(10000));
+        to.setDate(format.parse(date));
         task.add(to);
+        return to;
 
     }
 
-    protected  ArrayList<TaskObj>  listData(){
+    protected  List<TaskObj>  listData(){
         if(task.size() > 0)
             return task;
         else
@@ -34,30 +45,34 @@ class TaskManagement {
     }
 
     protected  TaskObj searchData(String name) {
-        if(!isNumeric(name)) {
-            for (TaskObj obj : task) {
-                String query = obj.getName();
-                if (query.equalsIgnoreCase(name)) {
-                    return obj;
+        if(task.size()>0){
+            if(!isNumeric(name)) {
+                for (TaskObj obj : task) {
+                    String query = obj.getName();
+                    if (query.equalsIgnoreCase(name)) {
+                        return obj;
+                    }
                 }
             }
-        }
-        else if(isNumeric(name)){
-            for (TaskObj obj : task) {
-                int query = obj.getId();
-                if (query == Integer.parseInt(name)) {
-                    return obj;
+            else if(isNumeric(name)){
+                for (TaskObj obj : task) {
+                    int query = obj.getId();
+                    if (query == Integer.parseInt(name)) {
+                        return obj;
+                    }
                 }
             }
+            else
+                return null;
         }
         return null;
     }
 
-    protected  TaskObj deleteData(TaskObj obj, String as){
+    protected  TaskObj deleteData(TaskObj obj, String que){
 
             if(obj != null) {
 
-                if (as.equalsIgnoreCase("y")) {
+                if (que.equalsIgnoreCase("y")) {
                     obj.setStatus(Status.DONE);
                 }
 
@@ -72,7 +87,7 @@ class TaskManagement {
 
 
 
-    protected  ArrayList<TaskObj> listByStatus(String qq){
+    protected  List<TaskObj> listByStatus(String qq){
 
         ArrayList<TaskObj> arr = new ArrayList<>();
 
@@ -106,7 +121,10 @@ class TaskManagement {
         TaskObj obj = searchData(name);
         if(updatedDesc != null){
             obj.setDesc(updatedDesc);
-          return  changeStatus(name,"inprogress");
+            if(!(obj.getStatus().toString()).equalsIgnoreCase("done"))
+                return  changeStatus(name,"inprogress");
+            else
+                return obj;
         }
         else{
             return null;
