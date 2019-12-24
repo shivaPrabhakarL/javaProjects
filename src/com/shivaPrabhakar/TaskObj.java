@@ -1,18 +1,24 @@
 package com.shivaPrabhakar;
 import java.util.Date;
-public class Taskobj{
+public class TaskObj{
 
-    enum Status{
-        INITIAL,
-        INPROGRESS,
-        DONE
-    }
-    Taskobj(){
+
+    TaskObj(){
         this.setStatus(Status.INITIAL);
     }
     private String name,desc;
-    private Status status;
+    Status status;
+    private int id;
     private Date date;
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+
 
     public String getName() {
         return name;
@@ -45,14 +51,6 @@ public class Taskobj{
     public void setDate(Date date) {
         this.date = date;
     }
-
-//    Taskobj(String s, String de){
-//        date = new Date();
-//        this.name = s;
-//        this.desc = de;
-//        this.status  = Status.INITIAL;
-//       // this.status = s1;
-//    }
 
     @Override
     public String toString() {
