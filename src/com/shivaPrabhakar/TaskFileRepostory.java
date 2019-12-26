@@ -1,64 +1,96 @@
 package com.shivaPrabhakar;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+
+import java.io.File;
+//import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-public class InMemoryTaskRepository implements  TaskRepository {
+public class TaskFileRepostory  implements TaskRepository {
+    private static final String task_JSON_FILE = "/home/shivap/Desktop/task.json";
     Random rand = new Random();
-    private List<TaskObj> task = new ArrayList<>();
-    SimpleDateFormat format =new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
-    public boolean checkData(){
-        return (task.size() > 0);
+    SimpleDateFormat format =new SimpleDateFormat("dd-MM-yyyy");
+
+    private ObjectMapper objectMapper = new ObjectMapper();
+    final File file = new File(task_JSON_FILE);
+
+
+    List<TaskObj> task;
+    public TaskFileRepostory() {
+        task = readFromFile();
     }
 
-    private  boolean isNumeric(String q){
-        try{
-            Integer.parseInt(q);
-            return true;
+
+    // We can use FileWriter instead of FileOutputStream.
+    public void writeToFile2(List<TaskObj> task) {
+        try {
+            objectMapper.writerWithDefaultPrettyPrinter()
+                    .writeValue(new FileWriter(task_JSON_FILE), task);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
-        catch (Exception e){
-            return false;
+    }
+
+    public List<TaskObj> readFromFile() {
+
+        if (file.exists()) {
+            try {
+                return objectMapper.readValue(file, TaskList.class);
+            } catch (IOException e) {
+                //System.out.println("No data to show.");
+                return new ArrayList<>();
+            }
+        } else {
+            return new ArrayList<>();
         }
     }
 
     @Override
-    public TaskObj addTask(String name,String des,String date) throws ParseException {
+    public TaskObj addTask(String name, String des, String date) throws ParseException {
         TaskObj to = new TaskObj();
         to.setName(name);
         to.setDesc(des);
         to.setId(rand.nextInt(10000));
         to.setDate(format.parse(date));
         task.add(to);
+        System.out.println();
+        writeToFile2(task);
         return to;
     }
 
     @Override
-    public TaskObj updateTask(String name, String updatedDesc){
+    public TaskObj updateTask(String name, String updatedDesc) {
         TaskObj obj = searchData(name);
+        System.out.println(obj);
         if(updatedDesc != null){
             obj.setDesc(updatedDesc);
-            if(!(obj.getStatus().toString()).equalsIgnoreCase("done"))
-                return  changeStatus(name,"inprogress");
+            if(!(obj.getStatus().toString()).equalsIgnoreCase("done")) {
+                writeToFile2(task);
+                return changeStatus(name, "inprogress");
+            }
             else
                 return obj;
         }
         else{
             return null;
         }
-
     }
 
     @Override
-    public TaskObj delete(String name){
-        TaskObj obj = searchData(name);
+    public TaskObj delete(String name) {
 
+        TaskObj obj = searchData(name);
         if(obj != null) {
 
-
-
             task.remove(obj);
+            writeToFile2(task);
             return obj;
         }
 
@@ -66,7 +98,7 @@ public class InMemoryTaskRepository implements  TaskRepository {
     }
 
     @Override
-    public TaskObj findById(Integer taskId){
+    public TaskObj findById(Integer taskId) {
         for (TaskObj obj : task) {
             int query = obj.getId();
             if (taskId == query) {
@@ -77,7 +109,7 @@ public class InMemoryTaskRepository implements  TaskRepository {
     }
 
     @Override
-    public List<TaskObj> findAll(){
+    public List<TaskObj> findAll() {
         if(task.size() > 0)
             return task;
         else
@@ -85,7 +117,7 @@ public class InMemoryTaskRepository implements  TaskRepository {
     }
 
     @Override
-    public List<TaskObj> findAllByStatus(String status){
+    public List<TaskObj> findAllByStatus(String status) {
         ArrayList<TaskObj> arr = new ArrayList<>();
 
         for (TaskObj obj : task) {
@@ -95,11 +127,10 @@ public class InMemoryTaskRepository implements  TaskRepository {
             }
         }
         return arr;
-
     }
 
     @Override
-    public   TaskObj searchData(String name) {
+    public TaskObj searchData(String name) {
         if(task.size()>0){
             if(!isNumeric(name)) {
                 for (TaskObj obj : task) {
@@ -110,12 +141,7 @@ public class InMemoryTaskRepository implements  TaskRepository {
                 }
             }
             else if(isNumeric(name)){
-                for (TaskObj obj : task) {
-                    int query = obj.getId();
-                    if (query == Integer.parseInt(name)) {
-                        return obj;
-                    }
-                }
+                return findById(Integer.parseInt(name));
             }
             else
                 return null;
@@ -124,21 +150,27 @@ public class InMemoryTaskRepository implements  TaskRepository {
     }
 
     @Override
-    public   TaskObj changeStatus(String name, String st) {
+    public TaskObj changeStatus(String name, String status) {
         TaskObj obj = searchData(name);
         if(obj != null) {
-            if (st.equalsIgnoreCase("initial"))
+            if (status.equalsIgnoreCase("initial"))
                 obj.setStatus(Status.INITIAL);
-            if (st.equalsIgnoreCase("inprogress")) {
+            if (status.equalsIgnoreCase("inprogress")) {
                 obj.setStatus(Status.INPROGRESS);
                 obj.setDate(new Date());
             }
-            if (st.equalsIgnoreCase("done")) {
+            if (status.equalsIgnoreCase("done")) {
                 obj.setStatus(Status.DONE);
                 obj.setDate(new Date());
             }
+            writeToFile2(task);
         }
         return obj;
+    }
+
+    @Override
+    public boolean checkData() {
+        return (task.size() > 0);
     }
 
     @Override
@@ -160,9 +192,13 @@ public class InMemoryTaskRepository implements  TaskRepository {
     @Override
     public List<TaskObj> getTodayTasks()throws ParseException {
         ArrayList<TaskObj> todayTasks = new ArrayList<>();
-        Date n = new Date();
+        String n =  format.format(new Date());
+      //  DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+       // String ns = n.format(myFormatObj);
+        System.out.println(n);
         for(TaskObj obj: task){
-            if(obj.getDate() == n){
+            Date od = obj.getDate();
+            if(od.equals(format.parse(n))){
                 todayTasks.add(obj);
             }
         }
@@ -171,4 +207,18 @@ public class InMemoryTaskRepository implements  TaskRepository {
         else
             return null;
     }
+
+    private  boolean isNumeric(String q){
+        try{
+            Integer.parseInt(q);
+            return true;
+        }
+        catch (Exception e){
+            return false;
+        }
+    }
+
+
 }
+
+

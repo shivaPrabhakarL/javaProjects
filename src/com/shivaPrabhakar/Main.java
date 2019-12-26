@@ -11,7 +11,7 @@ public class Main {
 
     protected static String menu ()throws IOException{
         System.out.println("\nenter function");
-        System.out.println("Add,  List,  Search,  Delete,  Quit, ListByStatus, ChangeStatus, updateDescription");
+        System.out.println("Add,  List,  Search,  Delete,  Quit, ListByStatus, ChangeStatus, updateDescription, sortbydate, getPendingTasks, getTodayTasks");
         return br.readLine();
     }
 
@@ -35,22 +35,22 @@ public class Main {
                 System.out.println("enter description");
                 String des = br.readLine();
 
-                System.out.println("enter task date in dd-mm-yyyy HH:mm:ss format");
+                System.out.println("enter task date in dd-mm-yyyy format");
                 String date = br.readLine();
                 if(date.equals("")){
                     while(date.equals("")) {
-                        System.out.println("enter task date in dd-mm-yyyy HH:mm:ss format");
+                        System.out.println("enter task date in dd-mm-yyyy format");
                         date = br.readLine();
                     }
                 }
-                System.out.println(tm.addData(name,des,date));
+                System.out.println(tm.addTask(name,des,date));
             }
 
             if (s.equalsIgnoreCase("list") ) {
                 if(tm.checkData()) {
-                    List<TaskObj> list = tm.listData();
+                    List<TaskObj> list = tm.findAll();
                     if (list != null)
-                        System.out.println(tm.listData());
+                        System.out.println(tm.findAll());
                     else
                         System.out.println("No data to show.");
                 }
@@ -76,12 +76,8 @@ public class Main {
                 if(tm.checkData()) {
                     System.out.println("enter task name or number");
                     String nam = br.readLine();
-                    TaskObj taskobject = tm.searchData(nam);
-                    if (taskobject != null) {
-                        System.out.println("if task is completed enter (y) else (n)");
-                        String as = br.readLine();
-                        System.out.println(tm.deleteData(taskobject, as));
-                    } else {
+                    TaskObj obj = tm.delete(nam);
+                    if(null == obj){
                         System.out.println("Task is not present to delete");
                     }
                 }
@@ -93,9 +89,9 @@ public class Main {
                 if(tm.checkData()) {
                     System.out.println("\nenter a status code to filter");
                     String qq = br.readLine();
-                    List<TaskObj> tasklist = tm.listByStatus(qq);
-                    if (tasklist != null)
-                        System.out.println(tasklist);
+                    List<TaskObj> taskList = tm.findAllByStatus(qq);
+                    if (taskList != null)
+                        System.out.println(taskList);
                     else
                         System.out.println("No tasks with status" + qq + " to show.");
                 }
@@ -125,14 +121,27 @@ public class Main {
                     String nam = br.readLine();
                     System.out.println("enter description");
                     String desc = br.readLine();
-                    TaskObj taskobject = tm.updateDescription(nam, desc);
-                    if (taskobject != null)
-                        System.out.println(taskobject);
+                    TaskObj taskObject = tm.updateTask(nam, desc);
+                    if (taskObject != null)
+                        System.out.println(taskObject);
                     else
                         System.out.println("Task is not present to change the description");
                 }
                 else
                     System.out.println("No data to show");
+            }
+
+            if(s.equalsIgnoreCase("sortbydate")){
+                List<TaskObj> tsk =  tm.sortByDate();
+                System.out.println(tsk);
+            }
+
+            if(s.equalsIgnoreCase("getPendingTasks")){
+                System.out.println(tm.getPendingTasks());
+            }
+
+            if(s.equalsIgnoreCase("getTodayTasks")){
+                System.out.println(tm.getTodayTask());
             }
 
             if (s.equalsIgnoreCase("Quit"))
