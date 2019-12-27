@@ -43,7 +43,7 @@ public class DataBase implements TaskRepository {
 
     }
 
-    public void createAndUpdateTable(TaskObj to) throws SQLException {
+    public void createAndUpdateTable(TaskObj to)  {
         String date = format.format(to.getDate());
         try {
            // stmt.executeUpdate("truncate table TaskList");
@@ -53,172 +53,221 @@ public class DataBase implements TaskRepository {
             query = "insert into TaskList values(" + to.getId() + ",'" + to.getName() + "','" + to.getDesc() + "', '"+date+"','" + to.getStatus().toString() + "' )";
             stmt.executeUpdate(query);
         } catch (Exception e) {
-            //System.out.println("hia");
-            query = "insert into TaskList values(" + to.getId() + ",'" + to.getName() + "','" + to.getDesc() + "', '"+date+"','" + to.getStatus().toString() + "' )" ;
-            System.out.println(query);
-            stmt.executeUpdate(query);
+            try {
+                query = "insert into TaskList values(" + to.getId() + ",'" + to.getName() + "','" + to.getDesc() + "', '" + date + "','" + to.getStatus().toString() + "' )";
+                System.out.println(query);
+                stmt.executeUpdate(query);
+            } catch (SQLException s){
+                e.printStackTrace();
+            }
         }
+
     }
 
     //public
 
-    public List<TaskObj> returnList(ResultSet results) throws SQLException, ParseException {
-       task = new ArrayList<>();
-        while(results.next()) {
+    public List<TaskObj> returnList(ResultSet results)  {
+       try {
+           task = new ArrayList<>();
+           while (results.next()) {
+               TaskObj to = new TaskObj();
+               String data = results.getString(1);
+               // System.out.println("Id " + " : " + data);
+               to.setId(Integer.parseInt(data));
+               // System.out.println(results.next());
+               data = results.getString("Name");
+               // System.out.println("Name"  + " : " + data);
+               to.setName(data);
+               data = results.getString("Description");
+               // System.out.println("Description"  + " : " + data);
+               to.setDesc(data);
+               data = results.getString("Ddate");
+               // System.out.println("Date"  + " : " + data);
+               to.setDate(format.parse(data));
+               data = results.getString("Status");
+               //System.out.println("Status"  + " : " + data+"\n");
+               if (data.equalsIgnoreCase("initial"))
+                   to.setStatus(Status.INITIAL);
+               if (data.equalsIgnoreCase("inprogress")) {
+                   to.setStatus(Status.INPROGRESS);
+                   to.setDate(new Date());
+               }
+               if (data.equalsIgnoreCase("done")) {
+                   to.setStatus(Status.DONE);
+                   to.setDate(new Date());
+               }
+               task.add(to);
+           }
+           return task;
+       } catch (SQLException | ParseException e){
+           e.printStackTrace();
+       }
+        return null;
+    }
+
+    private TaskObj returnObject(ResultSet results) {
+        try {
             TaskObj to = new TaskObj();
-            String data = results.getString(1);
-           // System.out.println("Id " + " : " + data);
-            to.setId(Integer.parseInt(data));
-           // System.out.println(results.next());
-            data = results.getString("Name");
-           // System.out.println("Name"  + " : " + data);
-            to.setName(data);
-            data = results.getString("Description");
-           // System.out.println("Description"  + " : " + data);
-            to.setDesc(data);
-            data = results.getString("Ddate");
-           // System.out.println("Date"  + " : " + data);
-            to.setDate(format.parse(data));
-            data = results.getString("Status");
-            //System.out.println("Status"  + " : " + data+"\n");
-            if (data.equalsIgnoreCase("initial"))
-                to.setStatus(Status.INITIAL);
-            if (data.equalsIgnoreCase("inprogress")) {
-                to.setStatus(Status.INPROGRESS);
-                to.setDate(new Date());
+            while (results.next()) {
+
+                String data = results.getString(1);
+                //System.out.println("Id " + " : " + data);
+                to.setId(Integer.parseInt(data));
+                // System.out.println(results.next());
+                data = results.getString("Name");
+                // System.out.println("Name" + " : " + data);
+                to.setName(data);
+                data = results.getString("Description");
+                //System.out.println("Description" + " : " + data);
+                to.setDesc(data);
+                data = results.getString("Ddate");
+                //System.out.println("Date" + " : " + data);
+                to.setDate(format.parse(data));
+                data = results.getString("Status");
+                System.out.println("Status" + " : " + data + "\n");
+                if (data.equalsIgnoreCase("initial"))
+                    to.setStatus(Status.INITIAL);
+                if (data.equalsIgnoreCase("inprogress")) {
+                    to.setStatus(Status.INPROGRESS);
+                    to.setDate(new Date());
+                }
+                if (data.equalsIgnoreCase("done")) {
+                    to.setStatus(Status.DONE);
+                    to.setDate(new Date());
+                }
             }
-            if (data.equalsIgnoreCase("done")) {
-                to.setStatus(Status.DONE);
-                to.setDate(new Date());
-            }
-            task.add(to);
+            return to;
+        } catch (SQLException | ParseException e){
+            e.printStackTrace();
         }
-        return task;
-    }
-
-    private TaskObj returnObject(ResultSet results)throws SQLException, ParseException {
-
-        TaskObj to = new TaskObj();
-        while(results.next()) {
-
-            String data = results.getString(1);
-            //System.out.println("Id " + " : " + data);
-            to.setId(Integer.parseInt(data));
-            // System.out.println(results.next());
-            data = results.getString("Name");
-           // System.out.println("Name" + " : " + data);
-            to.setName(data);
-            data = results.getString("Description");
-            //System.out.println("Description" + " : " + data);
-            to.setDesc(data);
-            data = results.getString("Ddate");
-            //System.out.println("Date" + " : " + data);
-            to.setDate(format.parse(data));
-            data = results.getString("Status");
-            System.out.println("Status" + " : " + data + "\n");
-            if (data.equalsIgnoreCase("initial"))
-                to.setStatus(Status.INITIAL);
-            if (data.equalsIgnoreCase("inprogress")) {
-                to.setStatus(Status.INPROGRESS);
-                to.setDate(new Date());
-            }
-            if (data.equalsIgnoreCase("done")) {
-                to.setStatus(Status.DONE);
-                to.setDate(new Date());
-            }
-        }
-        return to;
+        return null;
     }
 
 
     @Override
-    public TaskObj addTask(String name, String des, String date) throws ParseException, SQLException {
-        TaskObj to = new TaskObj();
-        to.setName(name);
-        to.setDesc(des);
-        to.setId(rand.nextInt(10000));
-        to.setDate(format.parse(date));
-        createAndUpdateTable(to);
-        return to;
-    }
-
-    @Override
-    public TaskObj updateTask(String name, String updatedDesc) throws SQLException, ParseException {
-        changeStatus(name, "INPROGRESS");
-        if(!isNumeric(name)) {
-            query = "update TaskList set Description = '"+updatedDesc+"' where Name = '"+name+"'";
-        }
-        else{
-            query = "update TaskList set Description = '"+updatedDesc+"' where Id = '"+name+"'";
-        }
-        stmt.executeUpdate(query);
-
-        return searchData(name);
-    }
-
-    @Override
-    public TaskObj delete(String name) throws SQLException, ParseException {
-        if(!isNumeric(name)) {
-            query = "delete FROM TaskList where Name ='"+name+"'";
-            //showData(results);
-        }
-        else{
-            query ="delete FROM TaskList where Id ='"+name+"'" ;
-            //showData(results);
-        }
-        stmt.executeUpdate(query);
-        return searchData(name);
-    }
-
-    @Override
-    public TaskObj findById(Integer taskId) throws SQLException, ParseException {
-        query = "SELECT * FROM TaskList where Id ='"+String.valueOf(taskId)+"'";
-        ResultSet results = stmt.executeQuery(query);
-        return returnObject(results);
-    }
-
-    @Override
-    public List<TaskObj> findAll() throws SQLException, ParseException {
-        query = "SELECT * FROM TaskList";
-        ResultSet results = stmt.executeQuery(query);
-
-        return returnList(results);
-    }
-
-    @Override
-    public List<TaskObj> findAllByStatus(String status) throws SQLException, ParseException {
-        query = "SELECT * FROM TaskList where Status ='"+status+"'";
-        ResultSet results = stmt.executeQuery(query);
-
-        return returnList(results);
-    }
-
-    @Override
-    public TaskObj searchData(String name) throws SQLException, ParseException {
-        if(!isNumeric(name)) {
-            query = "SELECT * FROM TaskList where Name ='"+name+"'";
-            ResultSet results = stmt.executeQuery(query);
-            return returnObject(results);
-            }
-
-        else if(isNumeric(name)){
-             return findById(Integer.parseInt(name));
+    public TaskObj addTask(String name, String des, String date) {
+        try{
+            TaskObj to = new TaskObj();
+            to.setName(name);
+            to.setDesc(des);
+            to.setId(rand.nextInt(10000));
+            to.setDate(format.parse(date));
+            createAndUpdateTable(to);
+            return to;
+        } catch (ParseException p){
+            p.printStackTrace();
         }
         return null;
     }
 
     @Override
-    public TaskObj changeStatus(String name, String status) throws SQLException, ParseException {
-        if(!isNumeric(name)) {
-            query = "update TaskList set Status = '" + status + "' where Name ='" + name + "'";
-        }
-        else{
-            query = "update TaskList set Status = '" + status + "' where Id = '" + name + "'";
-        }
-        stmt.executeUpdate(query);
-        //showData(results);
+    public TaskObj updateTask(String name, String updatedDesc)  {
+        try {
+            changeStatus(name, "INPROGRESS");
+            if (!isNumeric(name)) {
+                query = "update TaskList set Description = '" + updatedDesc + "' where Name = '" + name + "'";
+            } else {
+                query = "update TaskList set Description = '" + updatedDesc + "' where Id = '" + name + "'";
+            }
+            stmt.executeUpdate(query);
 
-        return searchData(name);
+            return searchData(name);
+        } catch (SQLException  e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public TaskObj delete(String name)  {
+        try {
+            if (!isNumeric(name)) {
+                query = "delete FROM TaskList where Name ='" + name + "'";
+                //showData(results);
+            } else {
+                query = "delete FROM TaskList where Id ='" + name + "'";
+                //showData(results);
+            }
+            stmt.executeUpdate(query);
+            return searchData(name);
+        }
+        catch (SQLException  e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public TaskObj findById(Integer taskId)  {
+        try {
+            query = "SELECT * FROM TaskList where Id ='" + String.valueOf(taskId) + "'";
+            ResultSet results = stmt.executeQuery(query);
+            return returnObject(results);
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public List<TaskObj> findAll()  {
+        try {
+            query = "SELECT * FROM TaskList";
+            ResultSet results = stmt.executeQuery(query);
+
+            return returnList(results);
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public List<TaskObj> findAllByStatus(String status)  {
+        try {
+            query = "SELECT * FROM TaskList where Status ='" + status + "'";
+            ResultSet results = stmt.executeQuery(query);
+
+            return returnList(results);
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public TaskObj searchData(String name)  {
+        try {
+            if (!isNumeric(name)) {
+                query = "SELECT * FROM TaskList where Name ='" + name + "'";
+                ResultSet results = stmt.executeQuery(query);
+                return returnObject(results);
+            } else if (isNumeric(name)) {
+                return findById(Integer.parseInt(name));
+            }
+            return null;
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public TaskObj changeStatus(String name, String status) {
+        try {
+            if (!isNumeric(name)) {
+                query = "update TaskList set Status = '" + status + "' where Name ='" + name + "'";
+            } else {
+                query = "update TaskList set Status = '" + status + "' where Id = '" + name + "'";
+            }
+            stmt.executeUpdate(query);
+            //showData(results);
+
+            return searchData(name);
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
@@ -227,27 +276,42 @@ public class DataBase implements TaskRepository {
     }
 
     @Override
-    public List<TaskObj> sortByDate() throws SQLException, ParseException {
-        query = "SELECT * FROM TaskList order by Ddate";
-        ResultSet rs = stmt.executeQuery(query);
+    public List<TaskObj> sortByDate() {
+       try {
+           query = "SELECT * FROM TaskList order by Ddate";
+           ResultSet rs = stmt.executeQuery(query);
 
-        return returnList(rs);
+           return returnList(rs);
+       } catch (SQLException e){
+           e.printStackTrace();
+       }
+        return null;
     }
 
     @Override
-    public List<TaskObj> getPendingTasks() throws SQLException, ParseException {
-        query = "SELECT * FROM TaskList where Status !='DONE'";
-        ResultSet results =  stmt.executeQuery(query);
+    public List<TaskObj> getPendingTasks() {
+        try {
+            query = "SELECT * FROM TaskList where Status !='DONE'";
+            ResultSet results = stmt.executeQuery(query);
 
-        return returnList(results);
+            return returnList(results);
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
-    public List<TaskObj> getTodayTasks() throws ParseException, SQLException {
-        String date =  format.format(new Date());
-        query = "select * from TaskList where Ddate = '"+date+"'";
-        ResultSet results = stmt.executeQuery(query);
+    public List<TaskObj> getTodayTasks() {
+        try {
+            String date = format.format(new Date());
+            query = "select * from TaskList where Ddate = '" + date + "'";
+            ResultSet results = stmt.executeQuery(query);
 
-        return returnList(results);
+            return returnList(results);
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+        return null;
     }
 }
