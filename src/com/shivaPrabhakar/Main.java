@@ -3,6 +3,7 @@ package com.shivaPrabhakar;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.List;
 
@@ -15,9 +16,9 @@ public class Main {
         return br.readLine();
     }
 
-    public static void main(String[] args) throws IOException, ParseException {
+    public static void main(String[] args) throws IOException, ParseException, SQLException {
 
-        TaskManager tm = new TaskManager();
+        TaskManager1 tm = new TaskManager1();
         while (true) {
             String s = menu();
 
@@ -35,11 +36,11 @@ public class Main {
                 System.out.println("enter description");
                 String des = br.readLine();
 
-                System.out.println("enter task date in dd-mm-yyyy format");
+                System.out.println("enter task date in yyyy-MM-dd format");
                 String date = br.readLine();
                 if(date.equals("")){
                     while(date.equals("")) {
-                        System.out.println("enter task date in dd-mm-yyyy format");
+                        System.out.println("enter task date in yyyy-MM-dd format");
                         date = br.readLine();
                     }
                 }
@@ -47,6 +48,7 @@ public class Main {
             }
 
             if (s.equalsIgnoreCase("list") ) {
+               // tm.findAll();
                 if(tm.checkData()) {
                     List<TaskObj> list = tm.findAll();
                     if (list != null)

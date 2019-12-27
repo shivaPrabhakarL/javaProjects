@@ -1,14 +1,14 @@
 package com.shivaPrabhakar;
+
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.List;
 
-public class TaskManager  {
-
+public class TaskManager1 {
     TaskRepository tr;
-    public TaskManager() {
+    public TaskManager1() {
         System.out.println("Initializing TaskFileRepo");
-       this.tr = new TaskFileRepostory();
+        this.tr = new DataBase();
     }
 
     public boolean checkData(){
@@ -22,18 +22,20 @@ public class TaskManager  {
     }
 
 
-    public  List<TaskObj>  findAll() throws SQLException, ParseException {
+    public List<TaskObj> findAll() throws SQLException, ParseException {
+
         return tr.findAll();
     }
 
 
     public  TaskObj searchData(String name) throws SQLException, ParseException {
+        System.out.println(name);
         return tr.searchData(name);
     }
 
 
     public  TaskObj delete(String name) throws SQLException, ParseException {
-           return tr.delete(name);
+        return tr.delete(name);
     }
 
 
