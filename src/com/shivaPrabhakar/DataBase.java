@@ -98,7 +98,10 @@ public class DataBase implements TaskRepository {
                }
                task.add(to);
            }
-           return task;
+           if(task.size()<=0)
+               return null;
+           else
+                return task;
        } catch (SQLException | ParseException e){
            e.printStackTrace();
        }
@@ -136,6 +139,8 @@ public class DataBase implements TaskRepository {
                     to.setDate(new Date());
                 }
             }
+            if(to.getId() ==0 || to.getName().equals(null))
+                return null;
             return to;
         } catch (SQLException | ParseException e){
             e.printStackTrace();
